@@ -30,11 +30,14 @@ chính là **agent chính**: điều phối, review, là agent duy nhất đư�
 | Agent | File | Model | Được sửa | Việc |
 |---|---|---|---|---|
 | `ba` | `.claude/agents/ba.md` | sonnet | chỉ `SPEC.md` | Yêu cầu → đặc tả + tiêu chí nghiệm thu kiểm được |
+| `ui-ux` | `.claude/agents/ui-ux.md` | sonnet | chỉ script tạm `*.tmp.cjs`, `.tmp-test/` | Thiết kế theo design system trước khi code; review trực quan trên ảnh chụp thật sau khi tester PASS |
 | `dev` | `.claude/agents/dev.md` | inherit | code, `TASKS.md` | Hiện thực trên nhánh, lint/build, commit local — không push/merge |
 | `tester` | `.claude/agents/tester.md` | sonnet | chỉ script tạm `*.tmp.cjs`, `.tmp-test/` | Kiểm thử nghiệm thu trên bản build thật, báo PASS/FAIL có bằng chứng |
 
-Luồng: BA → (hỏi người dùng nếu có câu hỏi mở) → dev → tester → tối đa **3 vòng**
-sửa → agent chính review diff → push nhánh → **merge chỉ khi người dùng đồng ý**.
+Luồng: BA → (hỏi người dùng nếu có câu hỏi mở) → UI/UX thiết kế → dev → tester →
+UI/UX review → tối đa **3 vòng** sửa → agent chính review diff → push nhánh →
+**merge chỉ khi người dùng đồng ý**. Hai bước UI/UX chỉ chạy khi yêu cầu ảnh hưởng
+giao diện/tương tác; "bắt buộc sửa" của UI/UX tính như FAIL của tester.
 Subagent không gọi được nhau và không thấy cuộc trò chuyện: agent chính phải
 chuyển đủ ngữ cảnh mỗi lần giao việc.
 
