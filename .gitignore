@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Temporary test artifacts (tester agent)
+*.tmp.cjs
+.tmp-test/
+
+# Claude Code personal settings (agents/skills in .claude/ are shared)
+.claude/settings.local.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

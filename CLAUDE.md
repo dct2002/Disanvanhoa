@@ -22,6 +22,22 @@ npm run lint     # oxlint
   Ghi cả những hướng đã thử nhưng không dùng và lý do — đó là phần giá trị
   nhất khi đọc lại về sau.
 
+## Team agents
+
+Gõ `/team <yêu cầu>` (`.claude/skills/team/SKILL.md`) để chạy cả team. Phiên
+chính là **agent chính**: điều phối, review, là agent duy nhất được push.
+
+| Agent | File | Model | Được sửa | Việc |
+|---|---|---|---|---|
+| `ba` | `.claude/agents/ba.md` | sonnet | chỉ `SPEC.md` | Yêu cầu → đặc tả + tiêu chí nghiệm thu kiểm được |
+| `dev` | `.claude/agents/dev.md` | inherit | code, `TASKS.md` | Hiện thực trên nhánh, lint/build, commit local — không push/merge |
+| `tester` | `.claude/agents/tester.md` | sonnet | chỉ script tạm `*.tmp.cjs`, `.tmp-test/` | Kiểm thử nghiệm thu trên bản build thật, báo PASS/FAIL có bằng chứng |
+
+Luồng: BA → (hỏi người dùng nếu có câu hỏi mở) → dev → tester → tối đa **3 vòng**
+sửa → agent chính review diff → push nhánh → **merge chỉ khi người dùng đồng ý**.
+Subagent không gọi được nhau và không thấy cuộc trò chuyện: agent chính phải
+chuyển đủ ngữ cảnh mỗi lần giao việc.
+
 ## Quy trình git (bắt buộc)
 
 Repo: `https://github.com/dct2002/Disanvanhoa` — nhánh chính `main`.
