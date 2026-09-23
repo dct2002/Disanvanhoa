@@ -40,7 +40,7 @@ function App() {
         <TangibleHeritage onOpenDetail={setSelected} />
         <IntangibleHeritage onOpenDetail={setSelected} />
         <DocumentaryHeritage onOpenDetail={setSelected} />
-        <Timeline />
+        <Timeline onOpenDetail={setSelected} />
         <UNESCOSection onOpenDetail={setSelected} />
         <ArtifactViewer />
         <Explore onOpenDetail={setSelected} />
