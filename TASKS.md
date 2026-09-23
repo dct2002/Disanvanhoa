@@ -778,3 +778,94 @@ placeholder SVG sinh động — có thể thay URL thật bất cứ lúc nào 
       vào commit cũ — trang PR #1 vẫn hiện các commit cũ (có dòng Claude và
       lịch sử có email). Ref này không xoá được bằng git; chỉ xoá được qua
       GitHub Support hoặc xoá hẳn repo.
+
+## 8. Giai đoạn B — Khả năng tiếp cận & cảm ứng
+
+Ba nhánh không đụng chung file nào, merge theo thứ tự nào cũng được:
+`feat/modal-giu-focus` (modal), `fix/ban-do-cam-ung` (bản đồ + `useLenis.ts`),
+`docs/giai-doan-b` (tài liệu này).
+
+### 8.1 Modal giữ focus bàn phím (GAP-04)
+- [x] Vấn đề: mở modal bằng bàn phím xong, Tab chạy ra các phần tử phía sau
+      nền mờ; đóng modal thì focus mất, người dùng phải Tab lại từ đầu trang.
+- [x] Sửa (`HeritageDetailModal.tsx`): `role="dialog"`, `aria-modal`,
+      `aria-labelledby` → tiêu đề; mở thì lưu phần tử đang focus (mọi nơi mở
+      modal đều là `<button>` — đã kiểm cả 6 nơi) rồi focus nút ✕; Tab/Shift+Tab
+      xoay vòng trong panel; đóng thì trả focus về phần tử đã lưu
+      (`preventScroll` để trang không nhảy).
+- [x] Lỗi tiềm ẩn phát hiện khi đọc code: effect cũ phụ thuộc `onClose`, mà
+      `App.tsx` truyền hàm inline mới sau mỗi lần render ⇒ effect chạy lại liên
+      tục khi modal đang mở. Trước đây vô hại, nhưng với logic focus thì mỗi
+      lần chạy lại sẽ bắt nhầm "phần tử mở modal" và giật focus về nút ✕. Đổi
+      sang chỉ phụ thuộc trạng thái mở/đóng, giữ `onClose` mới nhất qua ref.
+
+### 8.2 Lăn chuột trong modal (lỗi có sẵn, phát hiện khi kiểm thử B3)
+- [x] Vấn đề: trên desktop, lăn chuột lên modal **không cuộn nội dung modal**
+      mà cuộn trang phía sau (đo được: nội dung modal 0px, trang dịch 397px) —
+      phần dưới của các modal dài (thông tin, bản đồ vị trí) không đọc được
+      bằng con lăn.
+- [x] Nguyên nhân: Lenis bắt sự kiện wheel trên toàn trang để làm cuộn mượt,
+      kể cả khi con trỏ nằm trên một khung cuộn riêng.
+- [x] Sửa: gắn `data-lenis-prevent` cho khung cuộn của modal (cơ chế sẵn có của
+      Lenis để nhường sự kiện cho phần tử con).
+- [x] Kiểm: nội dung modal cuộn tới đáy (107/107px), trang phía sau Δ=0; đóng
+      modal xong lăn chuột vẫn cuộn trang bình thường (Δ=500).
+
+### 8.3 Bản đồ dùng được bằng chạm (GAP-06)
+- [x] Vấn đề (đọc code): trên cảm ứng, một cú chạm giả lập `mouseenter` +
+      `mousemove` nhưng không bao giờ có `mouseleave` ⇒ popup xem trước kẹt che
+      bản đồ, bản đồ nghiêng một lần rồi đứng im ở góc đó. Chấm ghim chỉ 10px.
+      Panel chi tiết nằm **dưới** bản đồ ở bố cục 1 cột nên chạm xong không thấy
+      gì thay đổi.
+- [x] Sửa: đổi sang pointer events, hover/nghiêng chỉ áp dụng khi
+      `pointerType === "mouse"`; vùng chạm ghim 34px (`p-3`) + `aria-label`;
+      nếu panel nằm dưới 70% chiều cao màn hình thì tự cuộn lên ngay dưới
+      navbar (thêm `scrollToElement(el, offset)` vào `useLenis.ts`, dùng lại
+      cho `scrollToSection`). Kiểm tra vị trí panel thay vì kiểm tra loại con
+      trỏ: đúng với mọi kiểu nhập và không phụ thuộc trình duyệt có báo
+      `pointerType` cho sự kiện click hay không.
+- [x] **Lỗi do chính thay đổi này gây ra, test bắt được**: chạm ghim Hà Nội lại
+      mở Bắc Ninh. Hai ghim chỉ cách nhau 16px trên mobile, vùng chạm 34px đè
+      lên nhau, ghim nằm trên "cướp" cú chạm. Không thể vừa có vùng chạm đủ to
+      vừa không chồng khi hai điểm sát nhau ⇒ phân xử theo **tâm ghim gần điểm
+      chạm nhất** (bàn phím thì giữ đúng ghim đang focus). Test chạm lần lượt
+      cả 10 ghim để khẳng định.
+
+### 8.4 Bản đồ trên desktop: không ghim nào click được bằng chuột (lỗi có sẵn)
+- [x] Phát hiện: test hover/click ghim trên desktop thất bại. Đo bằng chuột
+      thật (di chuyển → nhấn → nhả) từng ghim: **0/10 ghim click được**. Tính
+      năng chọn vùng trên desktop đã hỏng từ bản dựng đầu tiên mà chưa ai thấy
+      — các lần kiểm thử trước chỉ dùng `elementFromPoint` khi *không* có chuột,
+      lúc đó bản đồ chưa nghiêng nên mọi thứ trông bình thường.
+- [x] Nguyên nhân 1: chuột đi vào bản đồ làm nó nghiêng; container dùng
+      `.card-3d` (`preserve-3d`) nên nửa bản đồ xoay "lùi ra sau" mặt phẳng
+      container, mọi sự kiện rơi vào container. Đổi container sang
+      `transform-style: flat` (vẫn giữ `perspective`, vẫn nghiêng) ⇒ 4/10.
+- [x] Nguyên nhân 2: trong tấm bản đồ (`preserve-3d`), SVG nền và các nút ghim
+      là các mặt phẳng **trùng nhau trong 3D**; trình duyệt chọn cái nào "ở trên"
+      theo sai số làm tròn, và độ nghiêng chỉ nhích 0.00006° giữa lúc nhấn và
+      nhả là đủ lật kết quả: `pointerdown` rơi vào ghim, `pointerup` rơi vào
+      SVG ở **cùng toạ độ** ⇒ không có click. (Đã đo: ghim không hề dịch — giả
+      thuyết đầu tiên "ghim trượt khỏi con trỏ" là sai.) Bỏ `preserve-3d` ở
+      tấm bản đồ ⇒ 7/10, còn chập chờn.
+- [x] Sửa dứt điểm: với chuột, **chọn vùng ngay lúc nhấn** (`pointerdown` luôn
+      rơi đúng ghim), không đợi click cần nhấn–nhả cùng một phần tử. Cảm ứng
+      vẫn chọn bằng click để một cú vuốt cuộn trang bắt đầu trên ghim không bị
+      hiểu nhầm là chọn vùng.
+- [x] Hướng đã thử và bỏ: "đóng băng độ nghiêng khi hover ghim". Có giúp
+      (10/10 ở 2/3 lượt) nhưng vẫn chập chờn 29/30; sau khi chuyển sang chọn lúc
+      nhấn thì bỏ đi và đo lại vẫn **50/50** (5 lượt × 10 ghim) ⇒ không cần, bỏ
+      cho code gọn.
+
+### 8.5 Kiểm thử
+- [x] `npm run lint` + `npm run build` sạch trên từng nhánh.
+- [x] Nhánh modal: 10/10 test focus (Enter mở, focus vào ✕, Tab 25 lần không
+      lọt ra, Shift+Tab xoay vòng, Escape đóng và trả focus đúng thẻ, gỡ khoá
+      cuộn, luồng chuột vẫn chạy) + 4/4 test lăn chuột.
+- [x] Nhánh bản đồ: chuột thật 50/50 ghim; bản đồ vẫn nghiêng khi di chuột
+      trên nền; click ghim trên desktop không cuộn trang; Enter trên ghim chọn
+      đúng ghim đó. Cảm ứng 390×844: chạm 10/10 ghim đúng vùng, không popup kẹt,
+      không nghiêng, panel cuộn lên ngay dưới navbar (top=100px).
+- [x] B3 toàn trang mobile: hamburger mở/đóng; không cuộn ngang ở cả 10
+      section; chạm thẻ mở modal, vuốt cuộn được bên trong (0→300px), nút ✕
+      đóng; 0 lỗi console. Soát bằng mắt ảnh chụp full viewport.
