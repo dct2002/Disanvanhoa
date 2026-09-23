@@ -654,7 +654,7 @@ placeholder SVG sinh động — có thể thay URL thật bất cứ lúc nào 
       vòng chỉnh rồng 3D) chỉ tồn tại trên đĩa, không có cách quay lại.
 - [x] Làm: `git init`; danh tính commit đặt **riêng cho repo**
       (`git config --local`: `DCT <trudang2409@gmail.com>`), cấu hình global
-      `TruDC <trudc@hblab.vn>` giữ nguyên. `.gitignore` sẵn có đã loại
+      của máy giữ nguyên. `.gitignore` sẵn có đã loại
       `node_modules`, `dist`. Stage theo tên file (không `git add -A`), commit
       gốc `a5c9384`.
 - [x] Ghi chú: các cảnh báo "LF will be replaced by CRLF" khi commit là do
