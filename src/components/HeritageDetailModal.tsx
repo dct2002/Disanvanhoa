@@ -81,6 +81,9 @@ export default function HeritageDetailModal({ heritage, onClose }: Props) {
             role="dialog"
             aria-modal="true"
             aria-labelledby="heritage-modal-title"
+            // Without this, Lenis swallows wheel events page-wide: the modal's
+            // own content never scrolled and the page behind it moved instead.
+            data-lenis-prevent
             initial={{ opacity: 0, scale: 0.92, rotateX: 8, y: 30 }}
             animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 20 }}
