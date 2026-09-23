@@ -1,3 +1,10 @@
+import { scrollToSection } from "../hooks/useLenis";
+
+interface FooterLink {
+  label: string;
+  target?: string;
+}
+
 export default function Footer() {
   return (
     <footer id="about" className="relative overflow-hidden border-t border-gold/10 bg-ink pb-10 pt-20">
@@ -17,11 +24,19 @@ export default function Footer() {
 
           <FooterColumn
             title="Về dự án"
-            links={["Giới thiệu", "Đội ngũ thực hiện", "Liên hệ hợp tác"]}
+            links={[
+              { label: "Giới thiệu", target: "hero" },
+              { label: "Đội ngũ thực hiện" },
+              { label: "Liên hệ hợp tác" },
+            ]}
           />
           <FooterColumn
             title="Tài nguyên"
-            links={["UNESCO Việt Nam", "Nguồn dữ liệu & bản quyền ảnh", "Đóng góp tư liệu"]}
+            links={[
+              { label: "UNESCO Việt Nam", target: "unesco" },
+              { label: "Nguồn dữ liệu & bản quyền ảnh" },
+              { label: "Đóng góp tư liệu" },
+            ]}
           />
         </div>
 
@@ -36,16 +51,24 @@ export default function Footer() {
   );
 }
 
-function FooterColumn({ title, links }: { title: string; links: string[] }) {
+function FooterColumn({ title, links }: { title: string; links: FooterLink[] }) {
   return (
     <div>
       <p className="text-xs uppercase tracking-[0.25em] text-gold">{title}</p>
       <ul className="mt-4 space-y-2.5">
         {links.map((link) => (
-          <li key={link}>
-            <span className="cursor-default text-sm text-ivory-dim transition-colors hover:text-ivory">
-              {link}
-            </span>
+          <li key={link.label}>
+            {link.target ? (
+              <button
+                data-cursor-hover
+                onClick={() => scrollToSection(link.target!)}
+                className="text-left text-sm text-ivory-dim transition-colors hover:text-ivory"
+              >
+                {link.label}
+              </button>
+            ) : (
+              <span className="text-sm text-ivory-dim/60">{link.label}</span>
+            )}
           </li>
         ))}
       </ul>
