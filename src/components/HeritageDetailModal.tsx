@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Heritage } from "../types";
 import { eraLabels, heritageTypeLabels, regionLabels } from "../types";
@@ -9,19 +9,58 @@ interface Props {
   onClose: () => void;
 }
 
+const FOCUSABLE = 'button:not([disabled]), a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
 export default function HeritageDetailModal({ heritage, onClose }: Props) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
+  const isOpen = heritage !== null;
+
   useEffect(() => {
-    if (!heritage) return;
+    onCloseRef.current = onClose;
+  });
+
+  // Keyed on open/closed only: `onClose` is a fresh inline function on every
+  // App render, and re-running this effect would re-capture the opener and
+  // yank focus back to the close button mid-interaction.
+  useEffect(() => {
+    if (!isOpen) return;
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     document.body.style.overflow = "hidden";
+    closeRef.current?.focus();
+
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onCloseRef.current();
+        return;
+      }
+      const panel = panelRef.current;
+      if (e.key !== "Tab" || !panel) return;
+      const focusable = [...panel.querySelectorAll<HTMLElement>(FOCUSABLE)];
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (!panel.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      } else if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     }
+
     window.addEventListener("keydown", onKey);
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKey);
+      opener?.focus({ preventScroll: true });
     };
-  }, [heritage, onClose]);
+  }, [isOpen]);
 
   return (
     <AnimatePresence>
@@ -38,6 +77,13 @@ export default function HeritageDetailModal({ heritage, onClose }: Props) {
           />
 
           <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="heritage-modal-title"
+            // Without this, Lenis swallows wheel events page-wide: the modal's
+            // own content never scrolled and the page behind it moved instead.
+            data-lenis-prevent
             initial={{ opacity: 0, scale: 0.92, rotateX: 8, y: 30 }}
             animate={{ opacity: 1, scale: 1, rotateX: 0, y: 0 }}
             exit={{ opacity: 0, scale: 0.94, y: 20 }}
@@ -46,6 +92,7 @@ export default function HeritageDetailModal({ heritage, onClose }: Props) {
             className="glass-panel relative max-h-[88vh] w-full max-w-4xl overflow-y-auto rounded-2xl sm:rounded-[2rem]"
           >
             <button
+              ref={closeRef}
               onClick={onClose}
               data-cursor-hover
               className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full border border-gold/40 bg-ink/60 text-ivory transition-colors hover:border-gold hover:text-gold"
@@ -153,7 +200,9 @@ function GalleryHero({ heritage }: { heritage: Heritage }) {
             <p className="text-xs uppercase tracking-[0.3em] text-gold">
               {heritageTypeLabels[heritage.type]}
             </p>
-            <h2 className="mt-1 font-display text-2xl text-ivory sm:text-4xl">{heritage.name}</h2>
+            <h2 id="heritage-modal-title" className="mt-1 font-display text-2xl text-ivory sm:text-4xl">
+              {heritage.name}
+            </h2>
           </div>
           {heritage.unesco && (
             <span className="rounded-full border border-gold bg-ink/70 px-3 py-1.5 text-xs uppercase tracking-widest text-gold">
