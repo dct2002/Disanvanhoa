@@ -1,6 +1,6 @@
 import { Suspense, lazy } from "react";
 import { motion } from "framer-motion";
-import { getLenis } from "../hooks/useLenis";
+import { scrollToSection } from "../hooks/useLenis";
 import { useIsMobile, usePrefersReducedMotion } from "../hooks/useMediaQuery";
 import HeritageImage from "./HeritageImage";
 
@@ -11,14 +11,6 @@ const HERO_IMAGE =
 
 const titleLine1 = "DI SẢN".split("");
 const titleLine2 = "VĂN HÓA VIỆT NAM".split("");
-
-function scrollToId(id: string) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const lenis = getLenis();
-  if (lenis) lenis.scrollTo(el, { duration: 1.3 });
-  else el.scrollIntoView({ behavior: "smooth" });
-}
 
 export default function Hero() {
   const isMobile = useIsMobile();
@@ -104,7 +96,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 2, duration: 0.8 }}
-          onClick={() => scrollToId("map")}
+          onClick={() => scrollToSection("map")}
           data-cursor-hover
           className="btn-glow group relative mt-10 overflow-hidden rounded-full border border-gold/60 px-9 py-3.5 font-serif text-sm uppercase tracking-[0.25em] text-ivory transition-all duration-300 hover:-translate-y-0.5 hover:border-gold"
           style={{ transformStyle: "preserve-3d" }}
