@@ -656,7 +656,7 @@ placeholder SVG sinh động — có thể thay URL thật bất cứ lúc nào 
       (`git config --local`: `DCT <trudang2409@gmail.com>`), cấu hình global
       của máy giữ nguyên. `.gitignore` sẵn có đã loại
       `node_modules`, `dist`. Stage theo tên file (không `git add -A`), commit
-      gốc `a5c9384`.
+      gốc `0455d82` (hash sau khi viết lại lịch sử ở mục 7.9).
 - [x] Ghi chú: các cảnh báo "LF will be replaced by CRLF" khi commit là do
       `core.autocrlf` của máy — chỉ là cảnh báo, không ảnh hưởng nội dung.
 
@@ -741,3 +741,40 @@ placeholder SVG sinh động — có thể thay URL thật bất cứ lúc nào 
       rồng. Kiểm tra đúng là: phần tử nhận click không bao giờ là canvas rồng.
 - [x] Chụp full viewport 1440/1280/1100 và mobile để soát bằng mắt — nhờ bước
       này mới phát hiện lỗi menu xuống dòng ở 7.4.
+
+### 7.9 Viết lại lịch sử git: bỏ tên Claude khỏi commit, xoá email công việc
+- [x] Vấn đề: mọi commit đều có dòng `Co-Authored-By: Claude …` nên GitHub hiện
+      Claude là đồng tác giả; người dùng muốn commit chỉ đứng tên mình. Đồng thời
+      email công việc từng ghi trong mục 7.1 vẫn còn trong lịch sử các phiên bản
+      cũ của `TASKS.md` dù bản mới nhất đã xoá.
+- [x] Làm (người dùng chọn dọn cả lịch sử, không chỉ từ giờ):
+      1. Tag local `backup/truoc-viet-lai` (không push) giữ nguyên lịch sử cũ để
+         khôi phục nếu cần.
+      2. `git filter-branch --prune-empty` trên `main` và `docs/an-email`:
+         `--msg-filter` bỏ dòng Co-Authored-By của Claude; `--tree-filter` thay
+         đúng cụm chứa email bằng câu mà nhánh `docs/an-email` đã dùng ⇒ commit
+         xoá email trở thành rỗng và được gộp đi.
+      3. Force push `main`, xoá nhánh `docs/an-email`.
+      4. Quy tắc mới trong CLAUDE.md: commit/PR không thêm ghi chú Claude/AI.
+- [x] Sự cố gặp phải:
+      - Lần chạy đầu với `-c core.autocrlf=false` bị từ chối "unstaged changes":
+        file trong thư mục làm việc là CRLF (do `autocrlf=true` của máy), ép
+        `false` khiến git thấy chúng khác bản trong repo. Chạy lại với cài đặt
+        mặc định — git tự đưa về LF khi ghi, và kiểm tra hash cây bên dưới xác
+        nhận không file nào bị đổi.
+      - Force push lần đầu bị GitHub **từ chối** (`stale info`): trong lúc đó
+        người dùng đã tự merge PR #1 (`docs/an-email`) trên GitHub, tạo commit
+        `bb1ad08` mà máy chưa biết. `--force-with-lease` đã chặn đúng việc ghi
+        đè mù. Kiểm tra: cây của `bb1ad08` trùng khớp tuyệt đối với `main` đã
+        viết lại (`git diff` rỗng) ⇒ ghi đè không mất nội dung; push lại với
+        lease khoá đúng `bb1ad08`. Rút ra quy tắc mới: luôn `git fetch` và so
+        `origin/main` trước khi động vào `main`.
+- [x] Kiểm tra: 0 dòng `Co-Authored-By` trong toàn bộ lịch sử `main`; 0 lần xuất
+      hiện email công việc trong mọi phiên bản mọi file (`git log -p`); hash cây
+      `main` mới = hash cây bản mong muốn (`f282064…`); tác giả duy nhất
+      `DCT <trudang2409@gmail.com>`; vẫn 10 commit; phần thân message nhiều đoạn
+      giữ nguyên; `npm run build` sạch.
+- [x] Giới hạn còn lại: GitHub giữ ref chỉ-đọc `refs/pull/1/head` cho PR #1, trỏ
+      vào commit cũ — trang PR #1 vẫn hiện các commit cũ (có dòng Claude và
+      lịch sử có email). Ref này không xoá được bằng git; chỉ xoá được qua
+      GitHub Support hoặc xoá hẳn repo.
