@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0b0908;
+  --color-charcoal: #14100f;
+  --color-charcoal-light: #1d1715;
+  --color-burgundy: #5c1a24;
+  --color-burgundy-light: #7a2532;
+  --color-burgundy-dark: #3a0f16;
+  --color-gold: #d4af37;
+  --color-gold-light: #f0d78c;
+  --color-gold-dark: #a1791f;
+  --color-ivory: #f4ecd8;
+  --color-ivory-dim: #cfc3a6;
+
+  --font-display: "Playfair Display", "Cormorant Garamond", serif;
+  --font-serif: "Cormorant Garamond", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: auto;
+  background: var(--color-ink);
+}
+
+body {
+  margin: 0;
+  background: var(--color-ink);
+  color: var(--color-ivory);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-gold);
+  color: var(--color-ink);
+}
+
+/* ───────────── Scrollbar ───────────── */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ink);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--color-gold-dark), var(--color-burgundy));
+  border-radius: 8px;
+}
+
+/* ───────────── Utility layers ───────────── */
+.font-display {
+  font-family: var(--font-display);
+}
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(120deg, var(--color-gold-dark), var(--color-gold-light) 45%, var(--color-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glass-panel {
+  background: rgba(20, 16, 15, 0.55);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(212, 175, 55, 0.16);
+}
+
+.glass-nav {
+  background: rgba(11, 9, 8, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.14);
+}
+
+.ornament-pattern {
+  background-image: radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.08) 0, transparent 40%),
+    radial-gradient(circle at 80% 60%, rgba(92, 26, 36, 0.25) 0, transparent 45%);
+}
+
+.divider-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+.card-3d {
+  transform-style: preserve-3d;
+  perspective: 1200px;
+}
+
+.text-glow-gold {
+  text-shadow: 0 0 24px rgba(212, 175, 55, 0.45), 0 0 60px rgba(212, 175, 55, 0.15);
+}
+
+.btn-glow {
+  position: relative;
+  isolation: isolate;
+}
+.btn-glow::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(120deg, var(--color-gold-dark), var(--color-gold), var(--color-gold-light));
+  opacity: 0;
+  filter: blur(10px);
+  transition: opacity 0.4s ease;
+}
+.btn-glow:hover::before {
+  opacity: 0.85;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.dragon-layer {
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+@keyframes heroZoom {
+  0% {
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    transform: scale(1.12) translateY(-1.5%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
