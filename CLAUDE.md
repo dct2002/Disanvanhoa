@@ -41,6 +41,10 @@ giao diện/tương tác; "bắt buộc sửa" của UI/UX tính như FAIL của
 Subagent không gọi được nhau và không thấy cuộc trò chuyện: agent chính phải
 chuyển đủ ngữ cảnh mỗi lần giao việc.
 
+Khi sửa frontmatter của agent/skill: giá trị có chứa `: ` hoặc ` #` phải đặt
+trong nháy kép — nếu không YAML lỗi và agent **âm thầm biến mất** khỏi danh sách
+(đã xảy ra với `ui-ux`).
+
 ## Quy trình git (bắt buộc)
 
 Repo: `https://github.com/dct2002/Disanvanhoa` — nhánh chính `main`.
