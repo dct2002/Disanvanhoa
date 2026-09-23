@@ -63,6 +63,13 @@ Repo: `https://github.com/dct2002/Disanvanhoa` — nhánh chính `main`.
   người dùng cho phép rõ ràng.
 - Trước khi push nhánh có sửa code: `npm run lint` + `npm run build` phải sạch
   (xem mục Kiểm thử).
+- **Commit chỉ đứng tên người dùng.** Commit message không thêm dòng
+  `Co-Authored-By` hay bất kỳ ghi chú Claude/AI nào; mô tả Pull Request không
+  thêm dòng "Generated with Claude Code". Quy tắc này ưu tiên hơn mặc định của
+  công cụ.
+- Người dùng có thể tự merge Pull Request trên GitHub — luôn `git fetch` và so
+  `origin/main` trước khi merge hay push `main`, không giả định `main` trên
+  GitHub vẫn ở chỗ lần cuối mình đẩy.
 
 ## Nguyên tắc kiến trúc
 
