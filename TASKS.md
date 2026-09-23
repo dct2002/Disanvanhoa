@@ -646,3 +646,98 @@ placeholder SVG sinh động — có thể thay URL thật bất cứ lúc nào 
       hầu như không bao giờ như trước, mà thân vẫn liền mạch không tái
       diễn lỗi lệch mối nối ở tư thế nào được chụp. Không lỗi console;
       click CTA vẫn xuyên đúng qua canvas sau khi lướt trang + di chuột.
+
+## 7. Giai đoạn A — Nhất quán trải nghiệm (theo lộ trình sau khi viết SPEC.md)
+
+### 7.1 F1 — Đưa dự án vào git
+- [x] Vấn đề: dự án chưa có version control — mọi thay đổi (kể cả hàng chục
+      vòng chỉnh rồng 3D) chỉ tồn tại trên đĩa, không có cách quay lại.
+- [x] Làm: `git init`; danh tính commit đặt **riêng cho repo**
+      (`git config --local`: `DCT <trudang2409@gmail.com>`), cấu hình global
+      của máy giữ nguyên. `.gitignore` sẵn có đã loại
+      `node_modules`, `dist`. Stage theo tên file (không `git add -A`), commit
+      gốc `a5c9384`.
+- [x] Ghi chú: các cảnh báo "LF will be replaced by CRLF" khi commit là do
+      `core.autocrlf` của máy — chỉ là cảnh báo, không ảnh hưởng nội dung.
+
+### 7.2 A5 — Dọn asset thừa của template
+- [x] Xoá `src/assets/react.svg`, `vite.svg`, `hero.png`, `public/icons.svg`.
+      Đã grep `src/` và `index.html` trước khi xoá: không nơi nào tham chiếu.
+
+### 7.3 Hàm cuộn dùng chung `scrollToSection`
+- [x] Vấn đề: logic "cuộn mượt tới id bằng Lenis, fallback `scrollIntoView`"
+      bị chép ở `Navbar.tsx` (`goTo`) và `Hero.tsx` (`scrollToId`, duration
+      1.3 lệch với 1.2 của Navbar), và Footer sắp cần bản thứ ba.
+- [x] Sửa: gom về `scrollToSection(id)` trong `src/hooks/useLenis.ts` cạnh
+      `getLenis()`; Navbar, Hero, Footer cùng dùng. Duration thống nhất 1.2.
+
+### 7.4 A1 — Menu "Khám phá ▾" (GAP-01)
+- [x] Vấn đề: 3 section `unesco`, `artifact`, `explore` không có trong menu.
+      Thứ tự menu cũ cũng lệch thứ tự trang (Bản đồ đứng thứ 5 trong menu
+      nhưng là section thứ 2).
+- [x] Sửa: gộp 3 section vào nhóm con "Khám phá ▾" (theo lựa chọn của người
+      dùng — thêm thẳng 10 mục sẽ không vừa một dòng); sắp lại menu theo đúng
+      thứ tự trang. Mobile hiện nhóm dạng tiêu đề nhỏ + 3 mục con thụt lề.
+- [x] Lỗi tự phát hiện khi thiết kế: nút nhóm ban đầu **toggle** khi click —
+      nhưng hover đã mở dropdown, nên một cú click chuột sẽ đóng đúng cái menu
+      vừa hiện ra. Đổi thành click chỉ mở; đóng bằng rời chuột, rời focus bàn
+      phím (`onBlur` + `relatedTarget`), chọn mục con, hoặc Escape.
+- [x] Lỗi chỉ phát hiện nhờ ảnh chụp (test tự động không bắt được): thêm mục
+      thứ 8 làm các mục menu **xuống dòng** ("TRANG / CHỦ", "BẢN ĐỒ DI / SẢN")
+      và logo cũng xuống dòng. Đo bằng script ở 1280px: logo 208px + menu
+      1048px = 1256px > 1216px khả dụng. Sửa: `whitespace-nowrap`, khoảng cách
+      mục 24→16px, giãn chữ 0.15em→0.1em (tiết kiệm ~116px), và chỉ hiện menu
+      ngang từ `xl` (≥1280px) thay vì `lg` (1024px) — 8 mục không thể vừa ở
+      1024px. Đo lại ở 1280px: logo cách menu 75px, mép phải menu đúng bằng
+      giới hạn padding, không mục nào bị cắt.
+- [x] Dọn thêm: bỏ thẻ `<span>` gạch chân dùng `group-hover` trong nút menu cũ
+      — nút không có class `group` nên gạch chân đó chưa bao giờ hiện.
+
+### 7.5 A2 — Thẻ dòng thời gian mở modal (GAP-02)
+- [x] Vấn đề: `Timeline` là section nội dung duy nhất không nhận
+      `onOpenDetail`, dù kiểu `TimelineEvent` đã có sẵn `relatedHeritageIds`.
+- [x] Sửa: `App.tsx` truyền `onOpenDetail`; mỗi mốc tra di sản đầu tiên trong
+      `relatedHeritageIds` từ `allHeritage`. Có ⇒ thẻ thành `<button>` (viền
+      sáng khi hover, thêm dòng "Xem di sản →"); không có ⇒ giữ thẻ tĩnh.
+- [x] Dữ liệu: mốc 1070 (Văn Miếu) được bổ sung
+      `relatedHeritageIds: ["bia-tien-si-van-mieu"]` vì di sản này đã có trong
+      `heritage.ts`. Kết quả 5/9 mốc bấm được; 4 mốc còn lại (Bạch Đằng 938,
+      Cận đại 1858…) không có di sản tương ứng trong data nên để tĩnh — không
+      bịa liên kết.
+
+### 7.6 A3 — Footer (GAP-03)
+- [x] Vấn đề: 6 "liên kết" footer là `<span className="cursor-default
+      hover:text-ivory">` — trông như link, sáng lên khi hover, nhưng click
+      không làm gì.
+- [x] Sửa (theo lựa chọn của người dùng): "Giới thiệu" → `hero`, "UNESCO Việt
+      Nam" → `unesco` thành nút cuộn; 4 mục chưa có trang đích (Đội ngũ, Liên
+      hệ hợp tác, Nguồn dữ liệu & bản quyền ảnh, Đóng góp tư liệu) để chữ
+      thường mờ, **bỏ** hiệu ứng hover để không gây hiểu nhầm là link.
+
+### 7.7 A4 — Trống đồng trên mobile (GAP-05)
+- [x] Vấn đề: `ArtifactViewer` chỉ tắt 3D khi reduced-motion; trên mobile vẫn
+      dựng canvas WebGL, kèm ghi chú "Đã tối ưu hiệu ứng 3D" không đúng thực tế.
+- [x] Sửa: `show3D = !reducedMotion && !isMobile`, dùng nhánh ảnh tĩnh sẵn có;
+      sửa ghi chú thành "Trên di động hiển thị ảnh hiện vật thay cho mô hình 3D
+      để tiết kiệm pin."
+
+### 7.8 Kiểm thử
+- [x] `npm run lint` + `npm run build` sạch.
+- [x] Script puppeteer-core trên `npm run preview` — **19/19 đạt**:
+      desktop 1440×900 (hover mở dropdown; 3 mục con cuộn tới đúng section,
+      `top = 0`; click khi đang hover không đóng; Escape đóng; 5/9 mốc thời gian
+      bấm được, mốc 938 không; mốc 1070 mở modal "Bia đá các khoa thi tiến sĩ
+      triều Lê - Mạc"; footer 2 nút + 4 chữ thường, "UNESCO Việt Nam" cuộn tới
+      `#unesco`; canvas rồng `pointer-events: none` và không bao giờ là phần tử
+      nhận click); mobile 390×844 (menu có nhóm + 3 mục con; "Hiện vật 3D" cuộn
+      tới `#artifact`; `#artifact` 0 canvas, 1 ảnh; không cuộn ngang); 0 lỗi
+      console/pageerror.
+- [x] Hai lần FAIL đầu tiên đều là lỗi của chính script test, không phải lỗi
+      sản phẩm — ghi lại để lần sau khỏi mắc: (1) `document.querySelector('h2')`
+      lấy nhầm tiêu đề section đầu trang thay vì tiêu đề modal (phải chọn
+      `.fixed.inset-0 h2`); (2) kiểm tra "không có CANVAS tại điểm click" quá
+      rộng — canvas bắt được là **nền particle của Hero** (nằm trong `#hero`,
+      là nền trang trí, nút CTA vẫn nhận click bình thường), không phải canvas
+      rồng. Kiểm tra đúng là: phần tử nhận click không bao giờ là canvas rồng.
+- [x] Chụp full viewport 1440/1280/1100 và mobile để soát bằng mắt — nhờ bước
+      này mới phát hiện lỗi menu xuống dòng ở 7.4.

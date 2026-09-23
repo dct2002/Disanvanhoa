@@ -10,7 +10,7 @@
 
 | | |
 |---|---|
-| Phiên bản | 1.0 |
+| Phiên bản | 1.1 — cập nhật sau Giai đoạn A |
 | Cập nhật | 2026-09-23 |
 | Trạng thái | Bản dựng đầu tiên đã hoàn thành, đang trong giai đoạn tinh chỉnh |
 
@@ -91,23 +91,32 @@ hard-code nội dung trong JSX.
 
 ### 3.1 Thứ tự section (theo `App.tsx`)
 
-| # | Section | `id` | Có trong menu? |
+| # | Section | `id` | Mục menu |
 |---|---|---|---|
-| 1 | Hero | `hero` | ✔ Trang chủ |
-| 2 | Bản đồ di sản | `map` | ✔ Bản đồ di sản |
-| 3 | Di sản vật thể | `tangible` | ✔ Di sản vật thể |
-| 4 | Di sản phi vật thể | `intangible` | ✔ Di sản phi vật thể |
-| 5 | Di sản tư liệu | `documentary` | ✔ Di sản tư liệu |
-| 6 | Dòng thời gian | `timeline` | ✔ Dòng thời gian |
-| 7 | UNESCO | `unesco` | ✖ |
-| 8 | Trình xem hiện vật 3D | `artifact` | ✖ |
-| 9 | Khám phá (tìm kiếm) | `explore` | ✖ |
-| 10 | Footer | `about` | ✔ Về dự án |
+| 1 | Hero | `hero` | Trang chủ |
+| 2 | Bản đồ di sản | `map` | Bản đồ di sản |
+| 3 | Di sản vật thể | `tangible` | Di sản vật thể |
+| 4 | Di sản phi vật thể | `intangible` | Di sản phi vật thể |
+| 5 | Di sản tư liệu | `documentary` | Di sản tư liệu |
+| 6 | Dòng thời gian | `timeline` | Dòng thời gian |
+| 7 | UNESCO | `unesco` | Khám phá ▾ › UNESCO |
+| 8 | Trình xem hiện vật 3D | `artifact` | Khám phá ▾ › Hiện vật 3D |
+| 9 | Khám phá (tìm kiếm) | `explore` | Khám phá ▾ › Tra cứu di sản |
+| 10 | Footer | `about` | Về dự án |
 
-**FR-01** — Click mục menu hoặc logo phải cuộn mượt tới section tương ứng, ưu
-tiên Lenis (`duration: 1.2`), fallback `scrollIntoView` nếu Lenis chưa khởi tạo.
+Thứ tự mục menu trùng với thứ tự section trên trang.
+
+**FR-01** — Click mục menu, logo, nút CTA của Hero hoặc liên kết footer phải
+cuộn mượt tới section tương ứng qua hàm dùng chung `scrollToSection(id)`
+(`src/hooks/useLenis.ts`): ưu tiên Lenis (`duration: 1.2`), fallback
+`scrollIntoView` nếu Lenis chưa khởi tạo (ví dụ khi reduced-motion).
 **FR-02** — Navbar chuyển sang nền kính (`.glass-nav`) khi `scrollY > 60px`.
-**FR-03** — Dưới breakpoint `lg`, menu thu về nút hamburger mở/đóng dropdown.
+**FR-03** — Menu ngang chỉ hiện từ breakpoint `xl` (≥1280px) — dưới mức đó 8 mục
+không vừa một dòng; dưới `xl` dùng nút hamburger mở/đóng danh sách dọc.
+**FR-03a** — Nhóm "Khám phá ▾" (desktop): mở khi hover hoặc khi click/Enter,
+click lúc đang mở **không** đóng lại; đóng khi chuột rời nhóm, khi focus bàn phím
+rời nhóm, khi chọn mục con, hoặc phím Escape. Có `aria-haspopup` và
+`aria-expanded`. Trên mobile nhóm hiển thị dạng tiêu đề nhỏ + 3 mục con thụt lề.
 
 ---
 
@@ -134,14 +143,14 @@ Ký hiệu: **FR** = yêu cầu chức năng. Mỗi mục kèm tiêu chí nghi�
 | FR-10 | Di sản vật thể | Băng cuộn ngang các thẻ `type === "tangible"`, nút trái/phải cuộn ±420px mượt | Thẻ nghiêng 3D theo vị trí chuột, click mở modal |
 | FR-11 | Di sản phi vật thể | Các ảnh tròn trôi nổi nhẹ (chu kỳ 5–8s so le), hiện dần khi cuộn tới (chỉ một lần) | Click ảnh mở modal đúng di sản |
 | FR-12 | Di sản tư liệu | Thẻ tài liệu xoay nghiêng theo 6 góc preset, hover thì thẳng lại + phóng to + hiện mô tả | Click mở modal |
-| FR-13 | Dòng thời gian | Cuộn ngang 9 mốc lịch sử; lăn chuột dọc được quy đổi thành cuộn ngang (`deltaY × 1.4`); nút lùi/tiến ±360px | Thẻ hiện dần khi vào khung nhìn |
+| FR-13 | Dòng thời gian | Cuộn ngang 9 mốc lịch sử; lăn chuột dọc được quy đổi thành cuộn ngang (`deltaY × 1.4`); nút lùi/tiến ±360px. Mốc có `relatedHeritageIds` trỏ tới di sản có thật thì thẻ là nút bấm, có dòng "Xem di sản →", click mở modal di sản đó | Thẻ hiện dần khi vào khung nhìn; hiện 5/9 mốc bấm được, 4 mốc không có di sản tương ứng giữ dạng thẻ tĩnh |
 | FR-14 | UNESCO | 4 số liệu đếm tăng dần trong 1600ms (ease-out) khi vào khung nhìn lần đầu; carousel 3D tự chuyển mỗi 4200ms, chỉ hiện các thẻ lệch ±2 | Click thẻ giữa ⇒ mở modal; click thẻ bên ⇒ đưa thẻ đó ra giữa; chấm chỉ mục nhảy đúng vị trí |
-| FR-15 | Hiện vật 3D | Mô hình Trống đồng Đông Sơn xoay/zoom được bằng kéo–thả và lăn chuột, có nút bật/tắt tự xoay | Khi reduced-motion ⇒ thay bằng ảnh tĩnh, **không** dựng canvas 3D |
+| FR-15 | Hiện vật 3D | Mô hình Trống đồng Đông Sơn xoay/zoom được bằng kéo–thả và lăn chuột, có nút bật/tắt tự xoay | Khi reduced-motion **hoặc mobile** ⇒ thay bằng ảnh tĩnh, **không** dựng canvas 3D |
 | FR-16 | Khám phá | Ô tìm kiếm + 3 nhóm bộ lọc + lưới kết quả | Xem FR-17…FR-19 |
 | FR-17 | Tìm kiếm | Khớp chuỗi con, không phân biệt hoa thường, trên **tên · địa điểm · mô tả ngắn** | Lọc lại ngay mỗi lần gõ (không debounce) |
 | FR-18 | Bộ lọc | 3 nhóm (loại · khu vực · thời kỳ), mỗi nhóm chọn đơn, có tùy chọn "Tất cả"; các nhóm kết hợp theo **AND**, rồi mới áp từ khóa | Đổi bộ lọc ⇒ lưới cập nhật tức thì |
 | FR-19 | Không có kết quả | Hiện thông báo "Không tìm thấy di sản phù hợp…" thay vì lưới rỗng | — |
-| FR-20 | Footer | Thông tin dự án + năm bản quyền tính động | — |
+| FR-20 | Footer | Thông tin dự án + năm bản quyền tính động. "Giới thiệu" → `hero`, "UNESCO Việt Nam" → `unesco` là nút cuộn tới section; các mục chưa có trang đích hiển thị chữ thường, không hiệu ứng hover | Chỉ mục có đích mới phản ứng khi click |
 
 ### 4.3 Modal chi tiết
 
@@ -241,17 +250,17 @@ utility sẵn có để giữ đồng nhất.
 Các điểm chênh giữa ý định thiết kế và hiện trạng code, cần quyết định giữ
 nguyên hay khắc phục:
 
-| Mã | Mô tả | Ảnh hưởng |
-|---|---|---|
-| GAP-01 | Ba section `unesco`, `artifact`, `explore` không có mục trong menu điều hướng | Người dùng chỉ tới được bằng cách cuộn tay |
-| GAP-02 | Thẻ dòng thời gian không click được (không nhận `onOpenDetail`), khác với mọi section nội dung khác | Thiếu nhất quán tương tác |
-| GAP-03 | Các "liên kết" trong footer là `<span>`, click không có tác dụng | Gây kỳ vọng sai |
-| GAP-04 | Modal chưa bẫy tiêu điểm bàn phím (A11Y-05) | Người dùng bàn phím có thể tab ra sau nền mờ |
-| GAP-05 | `ArtifactViewer` chỉ tắt 3D khi reduced-motion, vẫn dựng canvas trên mobile (chỉ hiện ghi chú đã tối ưu) | Chênh với NFR-05 ở phần tinh thần "giảm tải cho mobile" |
-| GAP-06 | Bản đồ nghiêng theo `mousemove`, chưa kiểm thử trên thiết bị cảm ứng | Hành vi trên mobile chưa xác định |
-| GAP-07 | Các trường `coordinates`, `model3D`, `audio`, `video` đã có trong kiểu nhưng chưa dùng | Dữ liệu thừa, hoặc là chỗ bám cho Phase 10 |
-| GAP-08 | Rồng khóa hướng theo đốt cổ ⇒ ở một số tư thế mặt quay khuất khỏi người xem | Đánh đổi đã chấp nhận để ưu tiên đầu gắn liền thân (FR-30) |
-| GAP-09 | Chunk `three.js` ~893kB (gzip ~236kB), vượt ngưỡng cảnh báo của Vite | Thời gian tải lần đầu |
+| Mã | Mô tả | Ảnh hưởng | Trạng thái |
+|---|---|---|---|
+| GAP-01 | Ba section `unesco`, `artifact`, `explore` không có mục trong menu điều hướng | Người dùng chỉ tới được bằng cách cuộn tay | ✅ Đã khắc phục — nhóm "Khám phá ▾" (FR-03a) |
+| GAP-02 | Thẻ dòng thời gian không click được (không nhận `onOpenDetail`), khác với mọi section nội dung khác | Thiếu nhất quán tương tác | ✅ Đã khắc phục — 5/9 mốc mở modal (FR-13) |
+| GAP-03 | Các "liên kết" trong footer là `<span>`, click không có tác dụng | Gây kỳ vọng sai | ✅ Đã khắc phục — 2 mục có đích là nút, 4 mục còn lại bỏ hover (FR-20) |
+| GAP-04 | Modal chưa bẫy tiêu điểm bàn phím (A11Y-05) | Người dùng bàn phím có thể tab ra sau nền mờ | ⏳ Giai đoạn B |
+| GAP-05 | `ArtifactViewer` chỉ tắt 3D khi reduced-motion, vẫn dựng canvas trên mobile (chỉ hiện ghi chú đã tối ưu) | Chênh với NFR-05 ở phần tinh thần "giảm tải cho mobile" | ✅ Đã khắc phục — mobile dùng ảnh tĩnh (FR-15) |
+| GAP-06 | Bản đồ nghiêng theo `mousemove`, chưa kiểm thử trên thiết bị cảm ứng | Hành vi trên mobile chưa xác định | ⏳ Giai đoạn B |
+| GAP-07 | Các trường `coordinates`, `model3D`, `audio`, `video` đã có trong kiểu nhưng chưa dùng | Dữ liệu thừa, hoặc là chỗ bám cho Phase 10 | ⏳ Chờ quyết định |
+| GAP-08 | Rồng khóa hướng theo đốt cổ ⇒ ở một số tư thế mặt quay khuất khỏi người xem | Đánh đổi đã chấp nhận để ưu tiên đầu gắn liền thân (FR-30) | Chấp nhận |
+| GAP-09 | Chunk `three.js` ~893kB (gzip ~236kB), vượt ngưỡng cảnh báo của Vite | Thời gian tải lần đầu | ⏳ Giai đoạn C |
 
 ---
 
