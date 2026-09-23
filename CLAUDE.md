@@ -22,6 +22,48 @@ npm run lint     # oxlint
   Ghi cả những hướng đã thử nhưng không dùng và lý do — đó là phần giá trị
   nhất khi đọc lại về sau.
 
+## Quy trình git (bắt buộc)
+
+Repo: `https://github.com/dct2002/Disanvanhoa` — nhánh chính `main`.
+
+- **Không bao giờ commit hay push thẳng lên `main`.** Mọi thay đổi đi qua một
+  nhánh riêng, push nhánh đó lên GitHub, rồi mới hợp nhất vào `main` sau.
+- Tạo nhánh từ `main` mới nhất:
+
+  ```bash
+  git switch main && git pull --ff-only
+  git switch -c <loại>/<mô-tả-ngắn>
+  ```
+
+- Đặt tên nhánh `<loại>/<mô-tả-ngắn>`: chữ thường, không dấu, nối bằng `-`.
+
+  | Loại | Dùng khi | Ví dụ |
+  |---|---|---|
+  | `feat` | Thêm tính năng mới | `feat/menu-kham-pha` |
+  | `fix` | Sửa lỗi | `fix/dau-rong-lech-than` |
+  | `refactor` | Cấu trúc lại code, không đổi hành vi | `refactor/scroll-to-section` |
+  | `perf` | Cải thiện hiệu năng | `perf/tach-chunk-three` |
+  | `docs` | Chỉ sửa tài liệu | `docs/quy-trinh-git` |
+  | `chore` | Cấu hình, dọn dẹp, dependency | `chore/xoa-asset-thua` |
+
+- Mỗi nhánh chỉ phục vụ **một** mục đích; việc khác thì mở nhánh khác.
+- Trên nhánh: commit theo từng bước có ý nghĩa, rồi `git push -u origin <nhánh>`.
+- **Hợp nhất vào `main` chỉ khi người dùng đồng ý**, không tự làm ngay sau khi
+  push. Khi đã được đồng ý:
+
+  ```bash
+  git switch main && git pull --ff-only
+  git merge --no-ff <nhánh>      # giữ commit merge để thấy rõ ranh giới nhánh
+  git push origin main
+  git branch -d <nhánh> && git push origin --delete <nhánh>
+  ```
+
+  Hoặc người dùng tự tạo Pull Request trên GitHub từ link mà `git push` in ra.
+- Không `push --force` lên `main`, không viết lại lịch sử đã push khi chưa được
+  người dùng cho phép rõ ràng.
+- Trước khi push nhánh có sửa code: `npm run lint` + `npm run build` phải sạch
+  (xem mục Kiểm thử).
+
 ## Nguyên tắc kiến trúc
 
 - **Data-driven**: mọi nội dung hiển thị đọc từ `src/data/*.ts`. Không
