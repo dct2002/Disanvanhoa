@@ -37,6 +37,7 @@ export const timelineEvents: TimelineEvent[] = [
     id: "van-mieu-event",
     year: 1070,
     yearLabel: "1070",
+    relatedHeritageIds: ["bia-tien-si-van-mieu"],
     title: "Văn Miếu — Quốc Tử Giám",
     description:
       "Vua Lý Thánh Tông cho lập Văn Miếu thờ Khổng Tử; đến năm 1076, Quốc Tử Giám ra đời — trường đại học đầu tiên của Việt Nam, biểu tượng cho nền học vấn Nho giáo.",
