@@ -19,7 +19,7 @@ export default function ArtifactViewer() {
   const isMobile = useIsMobile();
   const reducedMotion = usePrefersReducedMotion();
   const [autoRotate, setAutoRotate] = useState(true);
-  const show3D = !reducedMotion;
+  const show3D = !reducedMotion && !isMobile;
 
   return (
     <section id="artifact" className="relative overflow-hidden bg-ink py-28">
@@ -85,7 +85,7 @@ export default function ArtifactViewer() {
             )}
             {isMobile && (
               <p className="mt-2 text-center text-[0.65rem] text-ivory-dim/70">
-                * Đã tối ưu hiệu ứng 3D cho thiết bị di động.
+                * Trên di động hiển thị ảnh hiện vật thay cho mô hình 3D để tiết kiệm pin.
               </p>
             )}
           </div>
