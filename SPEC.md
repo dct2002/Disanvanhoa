@@ -10,7 +10,7 @@
 
 | | |
 |---|---|
-| Phiên bản | 1.1 — cập nhật sau Giai đoạn A |
+| Phiên bản | 1.2 — cập nhật sau Giai đoạn B |
 | Cập nhật | 2026-09-23 |
 | Trạng thái | Bản dựng đầu tiên đã hoàn thành, đang trong giai đoạn tinh chỉnh |
 
@@ -139,7 +139,7 @@ Ký hiệu: **FR** = yêu cầu chức năng. Mỗi mục kèm tiêu chí nghi�
 | Mã | Section | Yêu cầu | Tiêu chí nghiệm thu |
 |---|---|---|---|
 | FR-08 | Hero | Tiêu đề hiện từng chữ (stagger tới ~2.4s), ảnh nền zoom chậm 24s, nút CTA cuộn tới `map` | Canvas particle 3D chỉ render khi **không** mobile và **không** reduced-motion |
-| FR-09 | Bản đồ | Bản đồ SVG hình chữ S, nghiêng 3D theo chuột; hover điểm ghim hiện popup (ảnh + tên + số lượng); click chọn vùng, hiện mô tả và lưới di sản thuộc vùng đó | Click một di sản trong lưới ⇒ mở modal đúng di sản. Bản đồ loại trừ `trong-dong-dong-son` |
+| FR-09 | Bản đồ | Bản đồ SVG hình chữ S, nghiêng 3D theo chuột; hover điểm ghim hiện popup (ảnh + tên + số lượng); chọn vùng hiện mô tả và lưới di sản thuộc vùng đó. **Chuột**: chọn ngay lúc nhấn. **Cảm ứng**: không nghiêng, không popup; chạm = chọn; vùng chạm mỗi ghim 34px, ghim chồng nhau được phân xử theo tâm gần điểm chạm nhất; nếu panel chi tiết nằm dưới bản đồ (bố cục 1 cột) thì tự cuộn panel lên ngay dưới navbar. **Bàn phím**: mỗi ghim là nút có `aria-label` tên vùng, Enter chọn đúng ghim đang focus | Click một di sản trong lưới ⇒ mở modal đúng di sản. Bản đồ loại trừ `trong-dong-dong-son`. Cả 10 ghim chọn đúng bằng chuột thật lẫn bằng chạm |
 | FR-10 | Di sản vật thể | Băng cuộn ngang các thẻ `type === "tangible"`, nút trái/phải cuộn ±420px mượt | Thẻ nghiêng 3D theo vị trí chuột, click mở modal |
 | FR-11 | Di sản phi vật thể | Các ảnh tròn trôi nổi nhẹ (chu kỳ 5–8s so le), hiện dần khi cuộn tới (chỉ một lần) | Click ảnh mở modal đúng di sản |
 | FR-12 | Di sản tư liệu | Thẻ tài liệu xoay nghiêng theo 6 góc preset, hover thì thẳng lại + phóng to + hiện mô tả | Click mở modal |
@@ -159,6 +159,8 @@ Ký hiệu: **FR** = yêu cầu chức năng. Mỗi mục kèm tiêu chí nghi�
 | FR-21 | Mở khi click bất kỳ thẻ di sản nào (trừ dòng thời gian — xem §8) | Tiêu đề modal khớp di sản đã click |
 | FR-22 | Thư viện ảnh với dải ảnh nhỏ; click ảnh nhỏ đổi ảnh lớn | Đổi sang di sản khác khi modal đang mở ⇒ chỉ mục ảnh reset (ép remount bằng `key={heritage.id}`) |
 | FR-23 | Đóng bằng: nút ✕, click nền mờ, hoặc phím **Escape** | Cả ba cách đều đóng được |
+| FR-23a | Giữ focus: mở modal thì focus chuyển tới nút ✕; Tab/Shift+Tab xoay vòng trong modal; đóng thì focus trả về đúng phần tử đã mở modal. Panel có `role="dialog"`, `aria-modal="true"`, `aria-labelledby` trỏ tới tiêu đề | Tab nhiều lần không lọt ra sau nền mờ |
+| FR-23b | Lăn chuột trên modal cuộn nội dung modal, trang phía sau đứng yên (khung cuộn có `data-lenis-prevent`) | Nội dung dài cuộn được tới đáy bằng con lăn |
 | FR-24 | Khóa cuộn trang nền khi modal mở, trả lại khi đóng | `document.body.style.overflow` được khôi phục |
 | FR-25 | Chỉ render các trường tùy chọn thực sự có dữ liệu | Không hiện hàng trống |
 | FR-26 | Ảnh lỗi tải ⇒ tự thay bằng placeholder SVG; ảnh ngoài khung nhìn dùng `loading="lazy"` | Ảnh hero của modal dùng `eager` |
@@ -229,7 +231,8 @@ utility sẵn có để giữ đồng nhất.
 | A11Y-02 | Ảnh nội dung có `alt` mô tả; ảnh trang trí để `alt=""` | ✔ Đạt |
 | A11Y-03 | Modal đóng được bằng phím Escape | ✔ Đạt |
 | A11Y-04 | Lớp trang trí (`CustomCursor`, `DragonCompanion`) đánh dấu `aria-hidden` | ✔ Đạt |
-| A11Y-05 | Modal bẫy tiêu điểm bàn phím và trả tiêu điểm về nơi vừa click | ✖ Chưa làm — xem §8 |
+| A11Y-05 | Modal bẫy tiêu điểm bàn phím và trả tiêu điểm về nơi vừa click | ✔ Đạt (FR-23a) |
+| A11Y-06 | Điểm ghim bản đồ có tên đọc được (`aria-label`) và chọn được bằng bàn phím | ✔ Đạt (FR-09) |
 
 ---
 
@@ -255,9 +258,9 @@ nguyên hay khắc phục:
 | GAP-01 | Ba section `unesco`, `artifact`, `explore` không có mục trong menu điều hướng | Người dùng chỉ tới được bằng cách cuộn tay | ✅ Đã khắc phục — nhóm "Khám phá ▾" (FR-03a) |
 | GAP-02 | Thẻ dòng thời gian không click được (không nhận `onOpenDetail`), khác với mọi section nội dung khác | Thiếu nhất quán tương tác | ✅ Đã khắc phục — 5/9 mốc mở modal (FR-13) |
 | GAP-03 | Các "liên kết" trong footer là `<span>`, click không có tác dụng | Gây kỳ vọng sai | ✅ Đã khắc phục — 2 mục có đích là nút, 4 mục còn lại bỏ hover (FR-20) |
-| GAP-04 | Modal chưa bẫy tiêu điểm bàn phím (A11Y-05) | Người dùng bàn phím có thể tab ra sau nền mờ | ⏳ Giai đoạn B |
+| GAP-04 | Modal chưa bẫy tiêu điểm bàn phím (A11Y-05) | Người dùng bàn phím có thể tab ra sau nền mờ | ✅ Đã khắc phục (FR-23a) |
 | GAP-05 | `ArtifactViewer` chỉ tắt 3D khi reduced-motion, vẫn dựng canvas trên mobile (chỉ hiện ghi chú đã tối ưu) | Chênh với NFR-05 ở phần tinh thần "giảm tải cho mobile" | ✅ Đã khắc phục — mobile dùng ảnh tĩnh (FR-15) |
-| GAP-06 | Bản đồ nghiêng theo `mousemove`, chưa kiểm thử trên thiết bị cảm ứng | Hành vi trên mobile chưa xác định | ⏳ Giai đoạn B |
+| GAP-06 | Bản đồ nghiêng theo `mousemove`, chưa kiểm thử trên thiết bị cảm ứng | Hành vi trên mobile chưa xác định | ✅ Đã khắc phục (FR-09) — khi kiểm thử còn phát hiện trên desktop **không ghim nào click được bằng chuột thật**, cũng đã sửa |
 | GAP-07 | Các trường `coordinates`, `model3D`, `audio`, `video` đã có trong kiểu nhưng chưa dùng | Dữ liệu thừa, hoặc là chỗ bám cho Phase 10 | ⏳ Chờ quyết định |
 | GAP-08 | Rồng khóa hướng theo đốt cổ ⇒ ở một số tư thế mặt quay khuất khỏi người xem | Đánh đổi đã chấp nhận để ưu tiên đầu gắn liền thân (FR-30) | Chấp nhận |
 | GAP-09 | Chunk `three.js` ~893kB (gzip ~236kB), vượt ngưỡng cảnh báo của Vite | Thời gian tải lần đầu | ⏳ Giai đoạn C |

@@ -140,7 +140,15 @@ Không báo "đã xong" nếu chỉ suy luận trên code. Quy trình chuẩn:
    rồi **gỡ biến debug** trước khi build lần cuối.
 5. Kiểm tra không có console error và click vẫn xuyên qua được canvas overlay
    (`document.elementFromPoint`).
-6. Xoá script/ảnh tạm và tắt preview server sau khi xong.
+6. Với phần tử tương tác, kiểm bằng **chuột/chạm thật** (`page.mouse.move` →
+   `down` → `up`, `page.touchscreen.tap`), không chỉ `elementFromPoint` hay
+   `el.click()`. Bản đồ từng trông "click được" theo `elementFromPoint` nhưng
+   thực tế 0/10 ghim bấm được: hiệu ứng nghiêng chỉ kích hoạt khi chuột thật
+   đi vào, và nhấn/nhả có thể rơi vào hai phần tử khác nhau.
+7. Tránh `transform-style: preserve-3d` trên vùng chứa phần tử bấm được khi
+   vùng đó xoay 3D: nửa lùi ra sau mặt phẳng cha bị mất sự kiện, các phần tử
+   cùng mặt phẳng tranh nhau hit-test (xem TASKS.md 8.4).
+8. Xoá script/ảnh tạm và tắt preview server sau khi xong.
 
 > Script kiểm thử tạm phải đặt trong thư mục dự án (không phải scratchpad)
 > thì Node mới resolve được `puppeteer-core` từ `node_modules`.
