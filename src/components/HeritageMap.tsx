@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { regions } from "../data/regions";
 import { allHeritage } from "../data/heritage";
+import { scrollToElement } from "../hooks/useLenis";
 import type { Heritage, RegionInfo } from "../types";
 import HeritageImage from "./HeritageImage";
 import SectionHeading from "./SectionHeading";
@@ -14,6 +15,7 @@ export default function HeritageMap({ onOpenDetail }: HeritageMapProps) {
   const [hovered, setHovered] = useState<RegionInfo | null>(null);
   const [active, setActive] = useState<RegionInfo | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const detailRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ rx: 0, ry: 0 });
 
   const activeHeritage = useMemo(() => {
@@ -21,12 +23,57 @@ export default function HeritageMap({ onOpenDetail }: HeritageMapProps) {
     return allHeritage.filter((h) => h.region === active.region && h.id !== "trong-dong-dong-son");
   }, [active]);
 
-  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+  // Hover/tilt are mouse-only: a touch tap emulates enter + move but never a
+  // matching leave, which left the preview popup stuck over the map and the
+  // map frozen at whatever angle the tap landed on.
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType !== "mouse") return;
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
     const px = (e.clientX - rect.left) / rect.width - 0.5;
     const py = (e.clientY - rect.top) / rect.height - 0.5;
     setTilt({ rx: py * -8, ry: px * 10 });
+  }
+
+  // Neighbouring pins sit as close as 16px apart (Hà Nội / Bắc Ninh on
+  // mobile), so finger-sized hit areas overlap and whichever button is on top
+  // would steal the tap — resolve by the pin whose centre is nearest instead.
+  function nearestRegion(x: number, y: number, fallback: RegionInfo) {
+    let chosen = fallback;
+    let best = Infinity;
+    for (const btn of containerRef.current?.querySelectorAll<HTMLButtonElement>("button[data-region-id]") ?? []) {
+      const r = btn.getBoundingClientRect();
+      const d = Math.hypot(r.x + r.width / 2 - x, r.y + r.height / 2 - y);
+      const match = regions.find((reg) => reg.id === btn.dataset.regionId);
+      if (d < best && match) {
+        best = d;
+        chosen = match;
+      }
+    }
+    return chosen;
+  }
+
+  // Mouse selects on press, not click: the tilted map's hit-testing can put
+  // press and release on different elements, and then no click fires at all
+  // (measured: 7–9 of 10 pins clickable). Touch still selects on click so a
+  // scroll gesture that starts on a pin isn't mistaken for a selection.
+  function handlePinPointerDown(e: React.PointerEvent<HTMLButtonElement>, region: RegionInfo) {
+    if (e.pointerType === "mouse" && e.button === 0) selectRegion(nearestRegion(e.clientX, e.clientY, region));
+  }
+
+  // Keyboard activation (detail === 0) keeps the focused pin. For mouse this
+  // re-selects the same region the press already chose — harmless.
+  function handlePinClick(e: React.MouseEvent<HTMLButtonElement>, region: RegionInfo) {
+    selectRegion(e.detail > 0 ? nearestRegion(e.clientX, e.clientY, region) : region);
+  }
+
+  function selectRegion(region: RegionInfo) {
+    setActive(region);
+    const panel = detailRef.current;
+    // Single-column layout puts the detail panel below the map, out of view.
+    if (panel && panel.getBoundingClientRect().top > window.innerHeight * 0.7) {
+      scrollToElement(panel, -100);
+    }
   }
 
   return (
@@ -42,15 +89,21 @@ export default function HeritageMap({ onOpenDetail }: HeritageMapProps) {
         <div className="mt-16 grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
           <div
             ref={containerRef}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={() => setTilt({ rx: 0, ry: 0 })}
+            onPointerMove={handlePointerMove}
+            onPointerLeave={() => setTilt({ rx: 0, ry: 0 })}
             className="card-3d relative mx-auto aspect-[3/4] w-full max-w-md"
+            // Both levels must stay `flat` for pins to be clickable while tilted.
+            // Container: with .card-3d's preserve-3d, the half of the map that
+            // rotates away sinks behind this plane and pointer events land here
+            // (0/10 pins clickable by mouse). Map: with preserve-3d, the SVG and
+            // the pins are coplanar in 3D, so which one gets hit flips on
+            // sub-degree tilt changes between press and release — no click.
+            style={{ transformStyle: "flat" }}
           >
             <motion.div
               className="glass-panel relative h-full w-full rounded-[2rem] p-6"
               animate={{ rotateX: tilt.rx, rotateY: tilt.ry }}
               transition={{ type: "spring", stiffness: 80, damping: 14 }}
-              style={{ transformStyle: "preserve-3d" }}
             >
               <svg viewBox="0 0 100 130" className="h-full w-full drop-shadow-[0_0_30px_rgba(212,175,55,0.15)]">
                 <path
@@ -66,10 +119,13 @@ export default function HeritageMap({ onOpenDetail }: HeritageMapProps) {
                 <button
                   key={region.id}
                   data-cursor-hover
-                  onMouseEnter={() => setHovered(region)}
-                  onMouseLeave={() => setHovered((h) => (h?.id === region.id ? null : h))}
-                  onClick={() => setActive(region)}
-                  className="group absolute -translate-x-1/2 -translate-y-1/2"
+                  aria-label={region.name}
+                  data-region-id={region.id}
+                  onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(region)}
+                  onPointerLeave={() => setHovered((h) => (h?.id === region.id ? null : h))}
+                  onPointerDown={(e) => handlePinPointerDown(e, region)}
+                  onClick={(e) => handlePinClick(e, region)}
+                  className="group absolute -translate-x-1/2 -translate-y-1/2 p-3"
                   style={{ left: `${region.mapPosition.x}%`, top: `${region.mapPosition.y}%` }}
                 >
                   <span className="absolute inset-0 -m-2 animate-ping rounded-full bg-gold/30" />
@@ -104,7 +160,7 @@ export default function HeritageMap({ onOpenDetail }: HeritageMapProps) {
             </AnimatePresence>
           </div>
 
-          <div className="flex flex-col justify-center">
+          <div ref={detailRef} className="flex flex-col justify-center">
             <AnimatePresence mode="wait">
               {active ? (
                 <motion.div

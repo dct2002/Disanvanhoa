@@ -7,11 +7,14 @@ export function getLenis() {
   return lenisInstance;
 }
 
+export function scrollToElement(el: HTMLElement, offset = 0) {
+  if (lenisInstance) lenisInstance.scrollTo(el, { duration: 1.2, offset });
+  else window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + offset, behavior: "smooth" });
+}
+
 export function scrollToSection(id: string) {
   const el = document.getElementById(id);
-  if (!el) return;
-  if (lenisInstance) lenisInstance.scrollTo(el, { duration: 1.2 });
-  else el.scrollIntoView({ behavior: "smooth" });
+  if (el) scrollToElement(el);
 }
 
 export function useLenis() {
