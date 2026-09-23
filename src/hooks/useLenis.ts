@@ -7,6 +7,13 @@ export function getLenis() {
   return lenisInstance;
 }
 
+export function scrollToSection(id: string) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (lenisInstance) lenisInstance.scrollTo(el, { duration: 1.2 });
+  else el.scrollIntoView({ behavior: "smooth" });
+}
+
 export function useLenis() {
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
