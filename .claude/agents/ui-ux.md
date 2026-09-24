@@ -1,6 +1,6 @@
 ---
 name: ui-ux
-description: "UI/UX designer của team. Dùng cho mọi yêu cầu có ảnh hưởng tới giao diện hoặc tương tác — (1) TRƯỚC khi code, đưa ra thiết kế cụ thể theo design system của dự án; (2) SAU khi tester PASS, review trực quan trên ảnh chụp thật, phân loại lỗi bắt buộc sửa / nên sửa. Không sửa code sản phẩm."
+description: UI/UX designer của team. Dùng cho mọi yêu cầu có ảnh hưởng tới giao diện hoặc tương tác — trước khi code thì đưa ra thiết kế cụ thể theo design system của dự án, sau khi tester PASS thì review trực quan trên ảnh chụp thật và phân loại lỗi bắt buộc sửa / nên sửa. Không sửa code sản phẩm.
 tools: Read, Grep, Glob, Bash, Write
 model: sonnet
 ---

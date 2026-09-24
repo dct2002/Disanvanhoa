@@ -41,9 +41,11 @@ giao diện/tương tác; "bắt buộc sửa" của UI/UX tính như FAIL của
 Subagent không gọi được nhau và không thấy cuộc trò chuyện: agent chính phải
 chuyển đủ ngữ cảnh mỗi lần giao việc.
 
-Khi sửa frontmatter của agent/skill: giá trị có chứa `: ` hoặc ` #` phải đặt
-trong nháy kép — nếu không YAML lỗi và agent **âm thầm biến mất** khỏi danh sách
-(đã xảy ra với `ui-ux`).
+Khi sửa frontmatter của agent/skill: viết giá trị một dòng, **không** chứa `: `
+hoặc ` #`, không cần nháy — theo đúng kiểu `ba.md`/`dev.md`/`tester.md`. File
+trong `.claude/` phải là LF (`.gitattributes` đã ép `eol=lf`). Sai một trong hai,
+agent **âm thầm biến mất** khỏi danh sách: `ui-ux` từng mất khi git ghi lại file
+bằng CRLF (description có `: `), và vẫn mất khi chỉ thêm nháy kép.
 
 ## Quy trình git (bắt buộc)
 

@@ -1,0 +1,3 @@
+# Agent/skill definitions are parsed by Claude Code; CRLF line endings from
+# core.autocrlf broke frontmatter parsing and silently dropped an agent.
+.claude/** text eol=lf
